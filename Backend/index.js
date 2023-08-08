@@ -6,6 +6,7 @@ const bodypaser = require('body-parser');
 const mongoose = require("mongoose");
 
 const userRouter = require('./routes/user.routes.js')
+const postRouter = require('./routes/post.routes.js')
 
 const app = express();
 
@@ -44,6 +45,7 @@ const uri = `mongodb://${HOST}:${DBPORT}/${DBNAME}`;
 mongoose.connect(uri).catch(error => console.log("Hubo un eror: ", error));
 
 app.use('/api/u', userRouter);
+app.use('/api/p', postRouter);
 
 app.use((req,res,next)=>{
   res.status(400).json({

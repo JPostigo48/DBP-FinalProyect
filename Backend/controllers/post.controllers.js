@@ -1,39 +1,44 @@
-const formidable = require("formidable");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
+const multer = require('multer');
+const upload = multer().single('file');
+
 const User = require("../models/user.model");
 const Post = require("../models/post.model");
-
+  
 exports.create = (req, res) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtensions = true;
-
-  form.parse(req)
-      .then(({ fields, files }) => {
-          const post = new Post(fields);
-
-          if (files.file) {
-              if (files.file.size > 1000000) {
-                  throw new Error("Solo permitimos 1MB como máximo por archivo :c");
-              }
-              post.file.data = fs.readFileSync(files.file.path);
-              post.file.contentType = files.file.type;
-          }
-
-          return post.save();
-      })
-      .then(result => {
-          res.json(result);
-      })
-      .catch(err => {
-          console.log(err);
-          let errorMessage = err.message || "Ocurrió un error al crear la publicación";
-          res.status(400).json({
-              error: errorMessage
-          });
+    upload(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Error al cargar el archivo",
+        });
+      }
+  
+      const { author, labels, title, description } = req.body;
+      console.log(req.file); // Aquí deberías ver el objeto del archivo cargado
+  
+      const post = new Post({
+        author,
+        labels: labels.split(" "),
+        title,
+        description,
+        file: {
+            data: req.file.buffer, // Acceder al buffer del archivo cargado
+            contentType: req.file.mimetype, // Obtener el tipo de contenido del archivo
+          },
       });
-};
+  
+      post.save().then((result) => {
+        return res.json({ message: "Publicación realizada con éxito" });
+      }).catch((err) => {
+        console.log(err)
+        return res.status(400).json({
+          error: err,
+        });
+      });
+    });
+  };   
 
 exports.list = (req, res) => {
   let order = req.query.order ? req.query.order : "desc";
@@ -136,6 +141,23 @@ exports.likes = (req, res) => {
       });
 };
 
+exports.likeCheck = (req, res) => {
+    const { id, Postid } = req.body;
+    Post.findById(Postid)
+      .exec()
+      .then(P => {
+        if (!P) {
+          throw new Error("El post no fue encontrado o no existe");
+        }
+        return res.json(P.likes.includes(id));
+      })
+      .catch(err => {
+        return res.status(400).json({
+          error: err.message,
+        });
+      });
+  };  
+
 exports.PostById = (req, res, next, id) => {
   Post.findById(id)
       .exec()
@@ -152,3 +174,36 @@ exports.PostById = (req, res, next, id) => {
           });
       });
 };
+
+exports.fileCheck = async (req, res) => {
+try {
+    if (req.Post.file.data) {
+    return res.send({ success: true });
+    } else {
+    return res.send({ success: false });
+    }
+} catch (err) {
+    return res.status(400).json({
+    error: err.message,
+    });
+}
+};
+
+exports.file = (req, res) => {
+    const postId = req.params.PostId;
+    Post.findById(postId)
+    .then((post) => {
+    console.log(post.file.contentType)
+      if (!post || !post.file) {
+        return res.status(404).json({ error: "PDF not found" });
+      }
+
+      res.set("Content-Type", post.file.contentType);
+      res.send(Buffer.from(post.file.data, "base64"));
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err.message });
+    });
+};
+  
+  

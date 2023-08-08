@@ -1,5 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import Routes from "./routes/routes";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Enrutador } from './routes/routes';
 
-ReactDOM.render(<Routes />, document.getElementById("root"));
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <Enrutador />
+  </React.StrictMode>
+);
