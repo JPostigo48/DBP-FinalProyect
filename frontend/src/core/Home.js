@@ -51,13 +51,13 @@ const Home = (req, res) => {
           <Contact img={home} name="Juan Carlos Postigo" area="Suport" />
         </Col>
         <Col className="">
-          <Contact img={home} name="Juan Carlos Postigo" area="Suport" />
+          <Contact img={home} name="Aquino Mamani Ana Karina" area="Suport" />
         </Col>
         <Col className="">
-          <Contact img={home} name="Juan Carlos Postigo" area="Suport" />
+          <Contact img={home} name="Soto Huerta Angela Shirleth" area="Suport" />
         </Col>
         <Col className="">
-          <Contact img={home} name="Juan Carlos Postigo" area="Suport" />
+          <Contact img={home} name="Colque Noa Valery Andrea" area="Suport" />
         </Col>
       </Row>
     </div>
